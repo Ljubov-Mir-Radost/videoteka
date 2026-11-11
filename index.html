@@ -100,7 +100,7 @@
     <main class="container" style="padding: 0 16px;">
       <div class="panel">
         <div class="controls">
-          <input type="text" id="searchInput" oninput="renderVideos()" style="flex:1; min-width:220px;" placeholder="Pretraži po reči, naslovu, #haštagu ili belešci (ćirilica ili latinica)...">
+          <input type="text" id="searchInput" autocomplete="off" oninput="renderVideos()" style="flex:1; min-width:220px;" placeholder="Pretraži po reči, naslovu, #haštagu ili belešci (ćirilica ili latinica)...">
           <select id="sortSelect" onchange="renderVideos()" style="width:auto;">
             <option value="newest" id="optNewest">Najnoviji prvo</option>
             <option value="oldest" id="optOldest">Najstariji prvo</option>
@@ -113,7 +113,7 @@
 
         <div id="tagsSection">
           <div class="top-row" style="margin-top:14px; font-size:12px; color:#94a3b8;">
-            <span id="lblTagsTitle">Filtriraj po #haštagu:</span>
+            <span id="lblTagsTitle">Filtriraj po #haštagu (klikni na haštag za izbor):</span>
             <span id="lblCounter" style="color:#818cf8; font-weight:700;">Prikazano: 0</span>
           </div>
           <div id="tagsContainer" class="tags-bar"></div>
@@ -136,14 +136,14 @@
 
       <label id="lblFormUrl">YouTube Link (Unlisted / Public) *</label>
       <div style="display:flex; gap:8px;">
-        <input type="url" id="formUrl" placeholder="https://www.youtube.com/watch?v=...">
+        <input type="url" id="formUrl" oninput="onUrlInputChange()" placeholder="https://www.youtube.com/watch?v=...">
         <button type="button" onclick="autoFetchTitle()" id="btnFetchTitle" class="btn-sec" style="white-space:nowrap;">Povuci naslov</button>
       </div>
 
       <label id="lblFormTitle">Naslov *</label>
       <input type="text" id="formTitle" placeholder="...">
 
-      <label id="lblFormDate">Datum</label>
+      <label id="lblFormDate">Datum (automatski sa YouTube-a)</label>
       <input type="date" id="formDate">
 
       <label id="lblFormTags">#Haštagovi (odvojeni zarezom)</label>
@@ -163,17 +163,17 @@
   </div>
 
   <script>
-    // =========================================================================
-    // ЗАЛЕПИ ГО ТВОЈОТ /exec ЛИНК ОД GOOGLE APPS SCRIPT ВО РЕДОТ ПОДОЛУ:
-    // =========================================================================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtRCRwCizk21gHkFstUvWFD05VKtdMqTfDMNPpdqIyNsTQUL2i1RiL6HNhiWmJ5uCH/exec";
+    // Вграден твојот Web App URL од Google Apps Script:
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxM8kXjq-1cG2wB07pT54qE2v8c2X8Xbi_be4WwQTbuiDshq3FQ6a06r9ekLcymdq/exec";
+    const STORAGE_KEY_PASS = "videoteka_saved_pass_v1";
+    const STORAGE_KEY_LANG = "videoteka_saved_lang_v1";
 
     var allVideos = [];
     var currentRole = null;
     var currentPassword = '';
     var selectedTag = null;
     var currentView = 'grid';
-    var currentLang = 'sr'; // SR/HR/BS е прв и стандарден избор
+    var currentLang = 'sr';
 
     var i18n = {
       sr: {
@@ -205,7 +205,7 @@
         modalEdit: 'Uredi video',
         formUrl: 'YouTube Link (Unlisted / Public) *',
         formTitle: 'Naslov *',
-        formDate: 'Datum',
+        formDate: 'Datum (automatski sa YouTube-a)',
         formTags: '#Haštagovi (odvojeni zarezom)',
         formNotes: 'Kratka beleška (opcionalno)',
         cancelBtn: 'Otkaži',
@@ -244,7 +244,7 @@
         modalEdit: 'Уреди видео',
         formUrl: 'YouTube Линк (Unlisted / Public) *',
         formTitle: 'Наслов на видеото *',
-        formDate: 'Датум',
+        formDate: 'Датум (автоматски од YouTube)',
         formTags: '#Хаштагови (одделени со запирка)',
         formNotes: 'Кратка белешка (опционално)',
         cancelBtn: 'Откажи',
@@ -256,7 +256,6 @@
       }
     };
 
-    // Позадински повик без Google колачиња (работи и со повеќе најавени Gmail сметки)
     function callServer(payload, onSuccess, onError) {
       fetch(SCRIPT_URL, {
         method: 'POST',
@@ -302,6 +301,7 @@
 
     function setLang(lang) {
       currentLang = lang;
+      try { localStorage.setItem(STORAGE_KEY_LANG, lang); } catch (e) {}
       var t = i18n[lang];
       document.getElementById('btnLangLoginSr').className = lang === 'sr' ? 'lang-btn active' : 'lang-btn';
       document.getElementById('btnLangLoginMk').className = lang === 'mk' ? 'lang-btn active' : 'lang-btn';
@@ -341,8 +341,8 @@
       }
     }
 
-    function handleLogin() {
-      var pass = document.getElementById('passwordInput').value;
+    function handleLogin(autoPass) {
+      var pass = autoPass || document.getElementById('passwordInput').value;
       var errBox = document.getElementById('loginError');
       var btnText = document.getElementById('lblLoginBtn');
       if (!pass) return;
@@ -353,12 +353,21 @@
       callServer({ action: 'verifyAndGetVideos', password: pass }, function(res) {
         btnText.textContent = i18n[currentLang].loginBtn;
         if (!res || !res.ok) {
-          errBox.textContent = (res && res.error) ? res.error : 'Pogrešna lozinka / Погрешна лозинка';
-          errBox.classList.remove('hidden');
+          try { localStorage.removeItem(STORAGE_KEY_PASS); } catch (e) {}
+          if (!autoPass) {
+            errBox.textContent = (res && res.error) ? res.error : 'Pogrešna lozinka / Погрешна лозинка';
+            errBox.classList.remove('hidden');
+          }
           return;
         }
         currentPassword = pass;
         currentRole = res.role;
+        try { localStorage.setItem(STORAGE_KEY_PASS, pass); } catch (e) {}
+
+        // Секогаш исчисти го старото пребарување и стариот избран хаштаг при најава
+        selectedTag = null;
+        document.getElementById('searchInput').value = '';
+
         allVideos = (res.videos || []).map(function(v) {
           v.tags = cleanTagsList(v.tags);
           return v;
@@ -378,8 +387,10 @@
         renderVideos();
       }, function(err) {
         btnText.textContent = i18n[currentLang].loginBtn;
-        errBox.textContent = 'Greška pri povezivanju / Грешка при поврзување: ' + (err && err.message ? err.message : err);
-        errBox.classList.remove('hidden');
+        if (!autoPass) {
+          errBox.textContent = 'Greška pri povezivanju / Грешка при поврзување: ' + (err && err.message ? err.message : err);
+          errBox.classList.remove('hidden');
+        }
       });
     }
 
@@ -402,12 +413,13 @@
       currentRole = null;
       allVideos = [];
       selectedTag = null;
+      try { localStorage.removeItem(STORAGE_KEY_PASS); } catch (e) {}
       document.getElementById('passwordInput').value = '';
+      document.getElementById('searchInput').value = '';
       document.getElementById('appScreen').classList.add('hidden');
       document.getElementById('loginScreen').classList.remove('hidden');
     }
 
-    // Прикажува САМО вистински #хаштагови (без вештачки таг „Сите видеа“)
     function renderTags() {
       var container = document.getElementById('tagsContainer');
       var counts = {};
@@ -434,8 +446,9 @@
       container.innerHTML = html;
     }
 
-    // Клик на хаштаг го вклучува филтерот; повторен клик на истиот хаштаг го исклучува
+    // Клик на хаштаг автоматски го чисти полето за пребарување за да не се кријат видеа
     function selectTag(tag) {
+      document.getElementById('searchInput').value = '';
       if (selectedTag === tag) {
         selectedTag = null;
       } else {
@@ -543,7 +556,6 @@
 
     function openModal(editId) {
       var modal = document.getElementById('videoModal');
-      var today = new Date().toISOString().split('T')[0];
       var t = i18n[currentLang];
       document.getElementById('modalError').classList.add('hidden');
 
@@ -566,7 +578,7 @@
         document.getElementById('editVideoId').value = v.id;
         document.getElementById('formUrl').value = v.url;
         document.getElementById('formTitle').value = v.title;
-        document.getElementById('formDate').value = v.date || today;
+        document.getElementById('formDate').value = v.date || '';
         document.getElementById('formTags').value = (v.tags || []).join(', ');
         document.getElementById('formNotes').value = v.notes || '';
       } else {
@@ -574,7 +586,8 @@
         document.getElementById('editVideoId').value = '';
         document.getElementById('formUrl').value = '';
         document.getElementById('formTitle').value = '';
-        document.getElementById('formDate').value = today;
+        // Празно поле за датум при ново видео за автоматски да се пополни од YouTube
+        document.getElementById('formDate').value = '';
         document.getElementById('formTags').value = '';
         document.getElementById('formNotes').value = '';
       }
@@ -592,7 +605,15 @@
       input.value = current.join(', ');
     }
 
-  function autoFetchTitle() {
+    // Штом залепиш YouTube линк, автоматски ги повлекува насловот и датумот на објавување
+    function onUrlInputChange() {
+      var url = document.getElementById('formUrl').value.trim();
+      if (extractYtId(url) && !document.getElementById('formTitle').value.trim()) {
+        autoFetchTitle();
+      }
+    }
+
+    function autoFetchTitle() {
       var url = document.getElementById('formUrl').value.trim();
       if (!url) return;
       var btn = document.getElementById('btnFetchTitle');
@@ -640,8 +661,7 @@
             return v;
           });
           closeModal();
-          renderTags();
-          renderVideos();
+          clearFilters();
         }
       });
     }
@@ -659,6 +679,16 @@
         }
       });
     }
+
+    // Автоматско најавување ако корисникот веќе се најавил претходно во овој прелистувач
+    window.addEventListener('DOMContentLoaded', function() {
+      try {
+        var savedLang = localStorage.getItem(STORAGE_KEY_LANG);
+        if (savedLang === 'mk' || savedLang === 'sr') setLang(savedLang);
+        var savedPass = localStorage.getItem(STORAGE_KEY_PASS);
+        if (savedPass) handleLogin(savedPass);
+      } catch (e) {}
+    });
   </script>
 </body>
 </html>
