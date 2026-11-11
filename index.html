@@ -592,15 +592,16 @@
       input.value = current.join(', ');
     }
 
-    function autoFetchTitle() {
+  function autoFetchTitle() {
       var url = document.getElementById('formUrl').value.trim();
       if (!url) return;
       var btn = document.getElementById('btnFetchTitle');
       btn.textContent = i18n[currentLang].fetching;
       callServer({ action: 'fetchYoutubeTitleServer', url: url }, function(res) {
         btn.textContent = i18n[currentLang].fetchTitle;
-        if (res && res.ok && res.title) {
-          document.getElementById('formTitle').value = res.title;
+        if (res && res.ok) {
+          if (res.title) document.getElementById('formTitle').value = res.title;
+          if (res.date) document.getElementById('formDate').value = res.date;
         }
       }, function() {
         btn.textContent = i18n[currentLang].fetchTitle;
