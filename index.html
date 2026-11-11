@@ -1,33 +1,663 @@
 <!DOCTYPE html>
-<html lang="mk">
+<html lang="sr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="0; url=https://script.google.com/macros/s/AKfycbwqLrWnOQkuxgT5copipbkwLCJFBjbkBNbi_be4WwQTbuiDshq3FQ6a06r9ekLcymdq/exec">
-  <title>Приватна Видеотека / Privatna Videoteka</title>
+  <meta name="robots" content="noindex, nofollow">
+  <title>Privatna Videoteka / Приватна Видеотека</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
+    .hidden { display: none !important; }
+    button { cursor: pointer; font-family: inherit; border: none; }
+    input, select, textarea { font-family: inherit; background: #020617; color: #fff; border: 1px solid #334155; border-radius: 10px; padding: 10px 12px; width: 100%; font-size: 14px; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: #6366f1; }
+    .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; background: #020617; }
+    .login-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; max-width: 420px; width: 100%; padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .top-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .badge { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #818cf8; background: rgba(49,46,129,0.5); border: 1px solid #3730a3; padding: 4px 10px; border-radius: 999px; }
+    .lang-switch { display: flex; gap: 4px; background: #1e293b; padding: 4px; border-radius: 8px; }
+    .lang-btn { padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; background: transparent; color: #cbd5e1; }
+    .lang-btn.active { background: #4f46e5; color: #fff; }
+    .btn-primary { width: 100%; background: #4f46e5; color: #fff; font-weight: 600; padding: 12px; border-radius: 10px; font-size: 14px; margin-top: 12px; }
+    .btn-primary:hover { background: #6366f1; }
+    .btn-sec { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+    .btn-sec:hover { background: #334155; }
+    .btn-green { background: #059669; color: #fff; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+    .btn-green:hover { background: #10b981; }
+    .error-box { background: rgba(136,19,55,0.4); border: 1px solid #be123c; color: #fda4af; padding: 10px; border-radius: 8px; font-size: 12px; margin-top: 10px; }
+    header { background: #0f172a; border-bottom: 1px solid #1e293b; padding: 14px 16px; position: sticky; top: 0; z-index: 20; }
+    .container { max-width: 1120px; margin: 0 auto; }
+    .panel { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 16px; margin-top: 20px; }
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .tags-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .tag-pill { background: #0f172a; color: #cbd5e1; border: 1px solid #334155; padding: 5px 11px; border-radius: 999px; font-size: 12px; }
+    .tag-pill.active { background: #4f46e5; color: #fff; border-color: #6366f1; }
+    .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-top: 20px; padding-bottom: 40px; }
+    .list-view { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; padding-bottom: 40px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
+    .thumb-wrap { display: block; position: relative; aspect-ratio: 16/9; background: #020617; overflow: hidden; text-decoration: none; }
+    .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .date-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(2,6,23,0.85); color: #cbd5e1; font-size: 11px; padding: 3px 7px; border-radius: 5px; }
+    .card-body { padding: 14px; }
+    .card-title { color: #fff; font-weight: 700; font-size: 15px; text-decoration: none; display: block; margin-bottom: 6px; line-height: 1.35; }
+    .card-title:hover { color: #818cf8; }
+    .card-notes { color: #94a3b8; font-size: 12px; margin-bottom: 8px; line-height: 1.4; }
+    .card-footer { padding: 10px 14px; background: #0f172a; border-top: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+    .yt-link { color: #818cf8; font-size: 12px; font-weight: 600; text-decoration: none; }
+    .modal-bg { position: fixed; inset: 0; background: rgba(2,6,23,0.85); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+    .modal-box { background: #1e293b; border: 1px solid #475569; border-radius: 16px; max-width: 520px; width: 100%; padding: 22px; max-height: 92vh; overflow-y: auto; }
+    label { display: block; font-size: 12px; color: #cbd5e1; margin: 10px 0 4px; }
+  </style>
 </head>
-<body style="background-color: #0f172a; color: #cbd5e1; font-family: system-ui, -apple-system, sans-serif; text-align: center; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box;">
-  
-  <div style="background: #1e293b; border: 1px solid #334155; padding: 40px 30px; border-radius: 16px; max-width: 450px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
-    
-    <div style="font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px;">
-      Пренасочување...
-    </div>
-    <div style="font-size: 16px; color: #94a3b8; margin-bottom: 30px;">
-      Preusmeravanje...
-    </div>
+<body>
 
-    <div style="display: flex; flex-direction: column; gap: 12px;">
-      <a href="https://script.google.com/macros/s/AKfycbwqLrWnOQkuxgT5copipbkwLCJFBjbkBNbi_be4WwQTbuiDshq3FQ6a06r9ekLcymdq/exec" style="background: #4f46e5; color: #fff; text-decoration: none; padding: 14px; border-radius: 10px; font-weight: 600; font-size: 14px; transition: background 0.2s;">
-        🇲🇰 Кликнете овде ако не се отвори автоматски
-      </a>
-      
-      <a href="https://script.google.com/macros/s/AKfycbwqLrWnOQkuxgT5copipbkwLCJFBjbkBNbi_be4WwQTbuiDshq3FQ6a06r9ekLcymdq/exec" style="background: #020617; color: #cbd5e1; text-decoration: none; padding: 14px; border-radius: 10px; font-weight: 600; font-size: 14px; border: 1px solid #334155;">
-        🇷🇸🇭🇷🇧🇦 Kliknite ovde ako se ne otvori automatski
-      </a>
+  <!-- ЕКРАН ЗА НАЈАВА (SR/HR/BS ПРВ ИЗБОР, МК ВТОР ИЗБОР) -->
+  <div id="loginScreen" class="login-wrap">
+    <div class="login-card">
+      <div class="top-row" style="margin-bottom:20px;">
+        <span class="badge" id="lblBadge">Zaštićeni Katalog</span>
+        <div class="lang-switch">
+          <button type="button" onclick="setLang('sr')" id="btnLangLoginSr" class="lang-btn active">🇷🇸🇭🇷🇧🇦 SR/HR/BS</button>
+          <button type="button" onclick="setLang('mk')" id="btnLangLoginMk" class="lang-btn">🇲🇰 МК</button>
+        </div>
+      </div>
+
+      <h1 id="lblLoginTitle" style="font-size:22px; margin-bottom:6px;">Privatna Videoteka</h1>
+      <p id="lblLoginSub" style="font-size:13px; color:#94a3b8; margin-bottom:18px;">Unesite pristupnu lozinku za učitavanje privatnih video linkova.</p>
+
+      <label id="lblPassInput">Lozinka za pristup</label>
+      <input type="password" id="passwordInput" placeholder="••••••••••••" onkeydown="if(event.key==='Enter'){event.preventDefault();handleLogin();}">
+
+      <div id="loginError" class="error-box hidden"></div>
+
+      <button type="button" id="btnSubmitLogin" class="btn-primary" onclick="handleLogin()">
+        <span id="lblLoginBtn">Otključaj biblioteku</span>
+      </button>
     </div>
-    
   </div>
 
+  <!-- ГЛАВЕН ЕКРАН НА АПЛИКАЦИЈАТА -->
+  <div id="appScreen" class="hidden">
+    <header>
+      <div class="container top-row">
+        <div>
+          <h1 id="lblAppTitle" style="font-size:18px;">▶ Privatna Videoteka</h1>
+          <div id="roleBadge" style="font-size:11px; color:#94a3b8; margin-top:2px;"></div>
+        </div>
+        <div class="controls">
+          <div class="lang-switch">
+            <button type="button" onclick="setLang('sr')" id="btnLangSr" class="lang-btn active">🇷🇸🇭🇷🇧🇦 SR/HR/BS</button>
+            <button type="button" onclick="setLang('mk')" id="btnLangMk" class="lang-btn">🇲🇰 МК</button>
+          </div>
+          <button type="button" onclick="refreshVideos()" class="btn-sec" id="btnRefresh">↻ Osveži</button>
+          <button type="button" onclick="openModal()" id="btnAddVideo" class="btn-green hidden">+ Dodaj video</button>
+          <button type="button" onclick="logout()" class="btn-sec" id="btnLogout">Odjava</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container" style="padding: 0 16px;">
+      <div class="panel">
+        <div class="controls">
+          <input type="text" id="searchInput" oninput="renderVideos()" style="flex:1; min-width:220px;" placeholder="Pretraži po reči, naslovu, #haštagu ili belešci (ćirilica ili latinica)...">
+          <select id="sortSelect" onchange="renderVideos()" style="width:auto;">
+            <option value="newest" id="optNewest">Najnoviji prvo</option>
+            <option value="oldest" id="optOldest">Najstariji prvo</option>
+            <option value="az" id="optAz">Po naslovu (A-Š)</option>
+          </select>
+          <button type="button" onclick="setView('grid')" id="btnViewGrid" class="btn-sec" style="background:#4f46e5;color:#fff;">Kartice</button>
+          <button type="button" onclick="setView('list')" id="btnViewList" class="btn-sec">Lista</button>
+          <button type="button" onclick="clearFilters()" id="btnReset" class="btn-sec hidden">Prikaži sve</button>
+        </div>
+
+        <div id="tagsSection">
+          <div class="top-row" style="margin-top:14px; font-size:12px; color:#94a3b8;">
+            <span id="lblTagsTitle">Filtriraj po #haštagu:</span>
+            <span id="lblCounter" style="color:#818cf8; font-weight:700;">Prikazano: 0</span>
+          </div>
+          <div id="tagsContainer" class="tags-bar"></div>
+        </div>
+      </div>
+
+      <div id="videosContainer" class="grid-view"></div>
+    </main>
+  </div>
+
+  <!-- ПРОЗОРЕЦ ЗА ДОДАВАЊЕ / УРЕДУВАЊЕ ВИДЕО (АДМИН) -->
+  <div id="videoModal" class="modal-bg hidden">
+    <div class="modal-box">
+      <div class="top-row" style="border-bottom:1px solid #334155; padding-bottom:10px; margin-bottom:10px;">
+        <h2 id="modalTitle" style="font-size:16px;">Dodaj novi video</h2>
+        <button type="button" onclick="closeModal()" class="btn-sec">✕</button>
+      </div>
+
+      <input type="hidden" id="editVideoId">
+
+      <label id="lblFormUrl">YouTube Link (Unlisted / Public) *</label>
+      <div style="display:flex; gap:8px;">
+        <input type="url" id="formUrl" placeholder="https://www.youtube.com/watch?v=...">
+        <button type="button" onclick="autoFetchTitle()" id="btnFetchTitle" class="btn-sec" style="white-space:nowrap;">Povuci naslov</button>
+      </div>
+
+      <label id="lblFormTitle">Naslov *</label>
+      <input type="text" id="formTitle" placeholder="...">
+
+      <label id="lblFormDate">Datum</label>
+      <input type="date" id="formDate">
+
+      <label id="lblFormTags">#Haštagovi (odvojeni zarezom)</label>
+      <input type="text" id="formTags" placeholder="svest, fokus, meditacija">
+      <div id="existingTagsSuggestions" class="tags-bar"></div>
+
+      <label id="lblFormNotes">Kratka beleška (opcionalno)</label>
+      <textarea id="formNotes" rows="3" placeholder="..."></textarea>
+
+      <div id="modalError" class="error-box hidden"></div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+        <button type="button" onclick="closeModal()" class="btn-sec" id="btnCancelModal">Otkaži</button>
+        <button type="button" onclick="handleSaveVideo()" id="btnSaveModal" class="btn-green">Sačuvaj u Tabelu</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // ЗАЛЕПИ ГО ТВОЈОТ /exec ЛИНК ОД GOOGLE APPS SCRIPT ВО РЕДОТ ПОДОЛУ:
+    // =========================================================================
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtRCRwCizk21gHkFstUvWFD05VKtdMqTfDMNPpdqIyNsTQUL2i1RiL6HNhiWmJ5uCH/exec";
+
+    var allVideos = [];
+    var currentRole = null;
+    var currentPassword = '';
+    var selectedTag = null;
+    var currentView = 'grid';
+    var currentLang = 'sr'; // SR/HR/BS е прв и стандарден избор
+
+    var i18n = {
+      sr: {
+        badge: 'Zaštićeni Katalog',
+        loginTitle: 'Privatna Videoteka',
+        loginSub: 'Unesite pristupnu lozinku za učitavanje privatnih video linkova.',
+        passInput: 'Lozinka za pristup',
+        loginBtn: 'Otključaj biblioteku',
+        loadingBtn: 'Učitavanje...',
+        appTitle: '▶ Privatna Videoteka',
+        roleAdmin: 'Administrator (Možete dodavati i uređivati)',
+        roleUser: 'Članski pristup',
+        refresh: '↻ Osveži',
+        addVideo: '+ Dodaj video',
+        logout: 'Odjava',
+        searchPlaceholder: 'Pretraži po reči, naslovu, #haštagu ili belešci (ćirilica ili latinica)...',
+        reset: 'Prikaži sve',
+        newest: 'Najnoviji prvo',
+        oldest: 'Najstariji prvo',
+        az: 'Po naslovu (A-Š)',
+        viewGrid: 'Kartice',
+        viewList: 'Lista',
+        tagsTitle: 'Filtriraj po #haštagu (klikni na haštag za izbor):',
+        noTagsYet: 'Nema unetih #haštagova',
+        shownCount: 'Prikazano:',
+        openYt: 'Otvori video u pregledaču ↗',
+        emptyList: 'Nema pronađenih videa za ovu pretragu.',
+        modalAdd: 'Dodaj novi video u Tabelu',
+        modalEdit: 'Uredi video',
+        formUrl: 'YouTube Link (Unlisted / Public) *',
+        formTitle: 'Naslov *',
+        formDate: 'Datum',
+        formTags: '#Haštagovi (odvojeni zarezom)',
+        formNotes: 'Kratka beleška (opcionalno)',
+        cancelBtn: 'Otkaži',
+        fetchTitle: 'Povuci naslov',
+        fetching: 'Tražim...',
+        saveBtn: 'Sačuvaj u Tabelu',
+        savingBtn: 'Upisivanje...',
+        confirmDelete: 'Da li ste sigurni da želite obrisati ovaj video?'
+      },
+      mk: {
+        badge: 'Заштитен Каталог',
+        loginTitle: 'Приватна Видеотека',
+        loginSub: 'Внесете ја пристапната лозинка за вчитување на приватните видео линкови.',
+        passInput: 'Лозинка за пристап',
+        loginBtn: 'Отклучи видеотека',
+        loadingBtn: 'Се вчитува...',
+        appTitle: '▶ Приватна Видеотека',
+        roleAdmin: 'Администратор (Можете да додавате и уредувате)',
+        roleUser: 'Членски пристап',
+        refresh: '↻ Освежи',
+        addVideo: '+ Додај видео',
+        logout: 'Одјава',
+        searchPlaceholder: 'Пребарај по збор, наслов, #хаштаг или белешка (кирилица или латиница)...',
+        reset: 'Прикажи сè',
+        newest: 'Најнови прво',
+        oldest: 'Најстари прво',
+        az: 'По наслов (А-Ш)',
+        viewGrid: 'Картички',
+        viewList: 'Листа',
+        tagsTitle: 'Филтрирај по #хаштаг (кликни на хаштаг за избор):',
+        noTagsYet: 'Нема внесени #хаштагови',
+        shownCount: 'Прикажани:',
+        openYt: 'Отвори видео во прелистувач ↗',
+        emptyList: 'Нема пронајдено видеа за ова пребарување.',
+        modalAdd: 'Додај ново видео во Табела',
+        modalEdit: 'Уреди видео',
+        formUrl: 'YouTube Линк (Unlisted / Public) *',
+        formTitle: 'Наслов на видеото *',
+        formDate: 'Датум',
+        formTags: '#Хаштагови (одделени со запирка)',
+        formNotes: 'Кратка белешка (опционално)',
+        cancelBtn: 'Откажи',
+        fetchTitle: 'Повлечи наслов',
+        fetching: 'Се бара...',
+        saveBtn: 'Зачувај во Табела',
+        savingBtn: 'Се запишува...',
+        confirmDelete: 'Дали сте сигурни дека сакате да го избришете ова видео?'
+      }
+    };
+
+    // Позадински повик без Google колачиња (работи и со повеќе најавени Gmail сметки)
+    function callServer(payload, onSuccess, onError) {
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        credentials: 'omit',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) { if (onSuccess) onSuccess(data); })
+      .catch(function(err) { if (onError) onError(err); });
+    }
+
+    function normalizeSearch(str) {
+      if (!str) return '';
+      var s = String(str).toLowerCase();
+      var map = {
+        'љ':'lj','њ':'nj','џ':'dz','ѓ':'gj','ќ':'kj','ђ':'dj','ћ':'c','ч':'c','ш':'s','ж':'z','ѕ':'dz',
+        'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','з':'z','и':'i','ј':'j','к':'k','л':'l','м':'m',
+        'н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'c',
+        'č':'c','ć':'c','š':'s','ž':'z','đ':'dj'
+      };
+      s = s.split('').map(function(ch) { return map[ch] || ch; }).join('');
+      return s.replace(/ije/g, 'e').replace(/je/g, 'e');
+    }
+
+    function extractYtId(url) {
+      if (!url) return null;
+      var m = String(url).match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+
+    function cleanTagsList(tagsArr) {
+      var out = [];
+      (tagsArr || []).forEach(function(raw) {
+        String(raw).split(/[,#]+/).forEach(function(part) {
+          var t = part.trim();
+          if (t && out.indexOf(t) === -1) out.push(t);
+        });
+      });
+      return out;
+    }
+
+    function setLang(lang) {
+      currentLang = lang;
+      var t = i18n[lang];
+      document.getElementById('btnLangLoginSr').className = lang === 'sr' ? 'lang-btn active' : 'lang-btn';
+      document.getElementById('btnLangLoginMk').className = lang === 'mk' ? 'lang-btn active' : 'lang-btn';
+      document.getElementById('btnLangSr').className = lang === 'sr' ? 'lang-btn active' : 'lang-btn';
+      document.getElementById('btnLangMk').className = lang === 'mk' ? 'lang-btn active' : 'lang-btn';
+
+      document.getElementById('lblBadge').textContent = t.badge;
+      document.getElementById('lblLoginTitle').textContent = t.loginTitle;
+      document.getElementById('lblLoginSub').textContent = t.loginSub;
+      document.getElementById('lblPassInput').textContent = t.passInput;
+      document.getElementById('lblLoginBtn').textContent = t.loginBtn;
+      document.getElementById('lblAppTitle').textContent = t.appTitle;
+      document.getElementById('btnRefresh').textContent = t.refresh;
+      document.getElementById('btnAddVideo').textContent = t.addVideo;
+      document.getElementById('btnLogout').textContent = t.logout;
+      document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+      document.getElementById('btnReset').textContent = t.reset;
+      document.getElementById('optNewest').textContent = t.newest;
+      document.getElementById('optOldest').textContent = t.oldest;
+      document.getElementById('optAz').textContent = t.az;
+      document.getElementById('btnViewGrid').textContent = t.viewGrid;
+      document.getElementById('btnViewList').textContent = t.viewList;
+      document.getElementById('lblTagsTitle').textContent = t.tagsTitle;
+      document.getElementById('lblFormUrl').textContent = t.formUrl;
+      document.getElementById('lblFormTitle').textContent = t.formTitle;
+      document.getElementById('lblFormDate').textContent = t.formDate;
+      document.getElementById('lblFormTags').textContent = t.formTags;
+      document.getElementById('lblFormNotes').textContent = t.formNotes;
+      document.getElementById('btnCancelModal').textContent = t.cancelBtn;
+      document.getElementById('btnFetchTitle').textContent = t.fetchTitle;
+      document.getElementById('btnSaveModal').textContent = t.saveBtn;
+
+      if (currentRole) {
+        document.getElementById('roleBadge').textContent = currentRole === 'admin' ? t.roleAdmin : t.roleUser;
+        renderTags();
+        renderVideos();
+      }
+    }
+
+    function handleLogin() {
+      var pass = document.getElementById('passwordInput').value;
+      var errBox = document.getElementById('loginError');
+      var btnText = document.getElementById('lblLoginBtn');
+      if (!pass) return;
+
+      errBox.classList.add('hidden');
+      btnText.textContent = i18n[currentLang].loadingBtn;
+
+      callServer({ action: 'verifyAndGetVideos', password: pass }, function(res) {
+        btnText.textContent = i18n[currentLang].loginBtn;
+        if (!res || !res.ok) {
+          errBox.textContent = (res && res.error) ? res.error : 'Pogrešna lozinka / Погрешна лозинка';
+          errBox.classList.remove('hidden');
+          return;
+        }
+        currentPassword = pass;
+        currentRole = res.role;
+        allVideos = (res.videos || []).map(function(v) {
+          v.tags = cleanTagsList(v.tags);
+          return v;
+        });
+
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('appScreen').classList.remove('hidden');
+        document.getElementById('roleBadge').textContent = currentRole === 'admin' ? i18n[currentLang].roleAdmin : i18n[currentLang].roleUser;
+
+        if (currentRole === 'admin') {
+          document.getElementById('btnAddVideo').classList.remove('hidden');
+        } else {
+          document.getElementById('btnAddVideo').classList.add('hidden');
+        }
+
+        renderTags();
+        renderVideos();
+      }, function(err) {
+        btnText.textContent = i18n[currentLang].loginBtn;
+        errBox.textContent = 'Greška pri povezivanju / Грешка при поврзување: ' + (err && err.message ? err.message : err);
+        errBox.classList.remove('hidden');
+      });
+    }
+
+    function refreshVideos() {
+      if (!currentPassword) return;
+      callServer({ action: 'verifyAndGetVideos', password: currentPassword }, function(res) {
+        if (res && res.ok) {
+          allVideos = (res.videos || []).map(function(v) {
+            v.tags = cleanTagsList(v.tags);
+            return v;
+          });
+          renderTags();
+          renderVideos();
+        }
+      });
+    }
+
+    function logout() {
+      currentPassword = '';
+      currentRole = null;
+      allVideos = [];
+      selectedTag = null;
+      document.getElementById('passwordInput').value = '';
+      document.getElementById('appScreen').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+    }
+
+    // Прикажува САМО вистински #хаштагови (без вештачки таг „Сите видеа“)
+    function renderTags() {
+      var container = document.getElementById('tagsContainer');
+      var counts = {};
+      allVideos.forEach(function(v) {
+        (v.tags || []).forEach(function(tag) {
+          var clean = String(tag).trim();
+          if (clean) counts[clean] = (counts[clean] || 0) + 1;
+        });
+      });
+
+      var keys = Object.keys(counts).sort();
+      if (keys.length === 0) {
+        container.innerHTML = '<span style="font-size:12px; color:#64748b;">' + i18n[currentLang].noTagsYet + '</span>';
+        return;
+      }
+
+      var html = '';
+      keys.forEach(function(tag) {
+        var safeTag = tag.replace(/'/g, "\\'");
+        var active = selectedTag === tag ? 'active' : '';
+        html += '<button type="button" onclick="selectTag(\'' + safeTag + '\')" class="tag-pill ' + active + '">#' + tag + ' (' + counts[tag] + ')</button>';
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Клик на хаштаг го вклучува филтерот; повторен клик на истиот хаштаг го исклучува
+    function selectTag(tag) {
+      if (selectedTag === tag) {
+        selectedTag = null;
+      } else {
+        selectedTag = tag;
+      }
+      renderTags();
+      renderVideos();
+    }
+
+    function clearFilters() {
+      document.getElementById('searchInput').value = '';
+      selectedTag = null;
+      renderTags();
+      renderVideos();
+    }
+
+    function setView(view) {
+      currentView = view;
+      document.getElementById('btnViewGrid').style.background = view === 'grid' ? '#4f46e5' : '#1e293b';
+      document.getElementById('btnViewList').style.background = view === 'list' ? '#4f46e5' : '#1e293b';
+      renderVideos();
+    }
+
+    function renderVideos() {
+      var q = normalizeSearch(document.getElementById('searchInput').value.trim());
+      var sortBy = document.getElementById('sortSelect').value;
+      var resetBtn = document.getElementById('btnReset');
+
+      if (q || selectedTag !== null) resetBtn.classList.remove('hidden');
+      else resetBtn.classList.add('hidden');
+
+      var filtered = allVideos.filter(function(v) {
+        if (selectedTag !== null && (v.tags || []).indexOf(selectedTag) === -1) return false;
+        if (!q) return true;
+        var haystack = normalizeSearch([v.title, v.notes, (v.tags || []).join(' '), v.date].join(' '));
+        return haystack.indexOf(q) !== -1;
+      });
+
+      filtered.sort(function(a, b) {
+        if (sortBy === 'newest') return String(b.date || '').localeCompare(String(a.date || '')) || (b.id - a.id);
+        if (sortBy === 'oldest') return String(a.date || '').localeCompare(String(b.date || '')) || (a.id - b.id);
+        return String(a.title || '').localeCompare(String(b.title || ''));
+      });
+
+      var t = i18n[currentLang];
+      document.getElementById('lblCounter').textContent = t.shownCount + ' ' + filtered.length + ' / ' + allVideos.length;
+
+      var container = document.getElementById('videosContainer');
+      if (filtered.length === 0) {
+        container.className = '';
+        container.innerHTML = '<div class="panel" style="text-align:center; padding:36px; color:#94a3b8;">' + t.emptyList + '</div>';
+        return;
+      }
+
+      container.className = currentView === 'grid' ? 'grid-view' : 'list-view';
+      container.innerHTML = filtered.map(function(v) {
+        var ytId = extractYtId(v.url);
+        var thumb = ytId ? 'https://i.ytimg.com/vi/' + ytId + '/hqdefault.jpg' : '';
+        var tagsHtml = (v.tags || []).map(function(tag) {
+          var safeTag = tag.replace(/'/g, "\\'");
+          var isAct = selectedTag === tag ? 'active' : '';
+          return '<button type="button" onclick="selectTag(\'' + safeTag + '\')" class="tag-pill ' + isAct + '" style="font-size:11px; padding:3px 8px;">#' + tag + '</button>';
+        }).join(' ');
+
+        var adminBtns = currentRole === 'admin'
+          ? '<div style="display:flex; gap:6px;"><button type="button" onclick="openModal(' + v.id + ')" class="btn-sec">✎</button><button type="button" onclick="deleteVideo(' + v.id + ')" class="btn-sec" style="color:#fda4af;">🗑</button></div>'
+          : '';
+
+        if (currentView === 'grid') {
+          return '<div class="card">' +
+            '<div>' +
+              '<a href="' + v.url + '" target="_blank" rel="noopener noreferrer" class="thumb-wrap">' +
+                (thumb ? '<img src="' + thumb + '" alt="">' : '') +
+                '<span class="date-badge">' + (v.date || '') + '</span>' +
+              '</a>' +
+              '<div class="card-body">' +
+                '<a href="' + v.url + '" target="_blank" rel="noopener noreferrer" class="card-title">' + v.title + '</a>' +
+                (v.notes ? '<p class="card-notes">' + v.notes + '</p>' : '') +
+                '<div class="tags-bar">' + tagsHtml + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="card-footer">' +
+              '<a href="' + v.url + '" target="_blank" rel="noopener noreferrer" class="yt-link">' + t.openYt + '</a>' +
+              adminBtns +
+            '</div>' +
+          '</div>';
+        } else {
+          return '<div class="card" style="padding:14px;">' +
+            '<div class="top-row">' +
+              '<div style="flex:1;">' +
+                '<span style="font-size:11px; color:#64748b;">' + (v.date || '') + '</span> ' +
+                '<a href="' + v.url + '" target="_blank" rel="noopener noreferrer" class="card-title" style="display:inline; margin-left:6px;">' + v.title + '</a>' +
+                (v.notes ? '<p class="card-notes" style="margin-top:4px;">' + v.notes + '</p>' : '') +
+                '<div class="tags-bar">' + tagsHtml + '</div>' +
+              '</div>' +
+              '<div style="display:flex; align-items:center; gap:8px;">' +
+                '<a href="' + v.url + '" target="_blank" rel="noopener noreferrer" class="btn-sec" style="text-decoration:none; color:#818cf8;">' + t.openYt + '</a>' +
+                adminBtns +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }
+      }).join('');
+    }
+
+    function openModal(editId) {
+      var modal = document.getElementById('videoModal');
+      var today = new Date().toISOString().split('T')[0];
+      var t = i18n[currentLang];
+      document.getElementById('modalError').classList.add('hidden');
+
+      var uniqueTags = [];
+      allVideos.forEach(function(v) {
+        (v.tags || []).forEach(function(tag) {
+          if (uniqueTags.indexOf(tag) === -1) uniqueTags.push(tag);
+        });
+      });
+
+      document.getElementById('existingTagsSuggestions').innerHTML = uniqueTags.map(function(tag) {
+        var safeTag = tag.replace(/'/g, "\\'");
+        return '<button type="button" onclick="appendTagToForm(\'' + safeTag + '\')" class="tag-pill" style="font-size:11px; padding:3px 8px;">+ #' + tag + '</button>';
+      }).join('');
+
+      if (editId) {
+        var v = allVideos.filter(function(item) { return item.id === editId; })[0];
+        if (!v) return;
+        document.getElementById('modalTitle').textContent = t.modalEdit;
+        document.getElementById('editVideoId').value = v.id;
+        document.getElementById('formUrl').value = v.url;
+        document.getElementById('formTitle').value = v.title;
+        document.getElementById('formDate').value = v.date || today;
+        document.getElementById('formTags').value = (v.tags || []).join(', ');
+        document.getElementById('formNotes').value = v.notes || '';
+      } else {
+        document.getElementById('modalTitle').textContent = t.modalAdd;
+        document.getElementById('editVideoId').value = '';
+        document.getElementById('formUrl').value = '';
+        document.getElementById('formTitle').value = '';
+        document.getElementById('formDate').value = today;
+        document.getElementById('formTags').value = '';
+        document.getElementById('formNotes').value = '';
+      }
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('videoModal').classList.add('hidden');
+    }
+
+    function appendTagToForm(tag) {
+      var input = document.getElementById('formTags');
+      var current = cleanTagsList([input.value]);
+      if (current.indexOf(tag) === -1) current.push(tag);
+      input.value = current.join(', ');
+    }
+
+    function autoFetchTitle() {
+      var url = document.getElementById('formUrl').value.trim();
+      if (!url) return;
+      var btn = document.getElementById('btnFetchTitle');
+      btn.textContent = i18n[currentLang].fetching;
+      callServer({ action: 'fetchYoutubeTitleServer', url: url }, function(res) {
+        btn.textContent = i18n[currentLang].fetchTitle;
+        if (res && res.ok && res.title) {
+          document.getElementById('formTitle').value = res.title;
+        }
+      }, function() {
+        btn.textContent = i18n[currentLang].fetchTitle;
+      });
+    }
+
+    function handleSaveVideo() {
+      var url = document.getElementById('formUrl').value.trim();
+      var title = document.getElementById('formTitle').value.trim();
+      var err = document.getElementById('modalError');
+      if (!url || !title) {
+        err.textContent = 'Unesite YouTube link i naslov / Внесете YouTube линк и наслов.';
+        err.classList.remove('hidden');
+        return;
+      }
+
+      var saveBtn = document.getElementById('btnSaveModal');
+      saveBtn.textContent = i18n[currentLang].savingBtn;
+
+      var formattedTags = cleanTagsList([document.getElementById('formTags').value]).join(', ');
+
+      var payload = {
+        id: document.getElementById('editVideoId').value || null,
+        url: url,
+        title: title,
+        date: document.getElementById('formDate').value,
+        tags: formattedTags,
+        notes: document.getElementById('formNotes').value.trim()
+      };
+
+      callServer({ action: 'saveVideoServer', password: currentPassword, videoData: payload }, function(res) {
+        saveBtn.textContent = i18n[currentLang].saveBtn;
+        if (res && res.ok) {
+          allVideos = (res.videos || []).map(function(v) {
+            v.tags = cleanTagsList(v.tags);
+            return v;
+          });
+          closeModal();
+          renderTags();
+          renderVideos();
+        }
+      });
+    }
+
+    function deleteVideo(id) {
+      if (!confirm(i18n[currentLang].confirmDelete)) return;
+      callServer({ action: 'deleteVideoServer', password: currentPassword, videoId: id }, function(res) {
+        if (res && res.ok) {
+          allVideos = (res.videos || []).map(function(v) {
+            v.tags = cleanTagsList(v.tags);
+            return v;
+          });
+          renderTags();
+          renderVideos();
+        }
+      });
+    }
+  </script>
 </body>
 </html>
